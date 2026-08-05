@@ -375,7 +375,7 @@ export const createWorkspace = async (req, res) => {
 
       community: community ? JSON.parse(community) : [],
 
-      officeTiming: officeTiming ? JSON.parse(officeTiming) : {},
+      officeTiming: officeTiming ? JSON.parse(officeTiming) : [],
 
       featured,
 
@@ -547,7 +547,7 @@ export const deleteWorkspace = async (req, res) => {
   }
 };
 
-// GET WORKSPACES BY CITY SLUG + OPTIONAL SUBCATEGORY SLUG (NAYA)
+
 export const getWorkspacesBySlug = async (req, res) => {
   try {
     const { citySlug, subCategorySlug } = req.params;
@@ -603,7 +603,7 @@ export const getWorkspacesBySlug = async (req, res) => {
   }
 };
 
-// GET SINGLE WORKSPACE BY SLUG (NAYA — details page ke liye)
+
 export const getWorkspaceBySlug = async (req, res) => {
   try {
     const workspace = await Workspace.findOne({

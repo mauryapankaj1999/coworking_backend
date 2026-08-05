@@ -108,21 +108,18 @@ const workspaceSchema = new mongoose.Schema(
     ],
 
     // Office Timing
-    officeTiming: {
-      monday: String,
-
-      tuesday: String,
-
-      wednesday: String,
-
-      thursday: String,
-
-      friday: String,
-
-      saturday: String,
-
-      sunday: String,
+   officeTiming: [
+  {
+    label: {
+      type: String,
+      required: true,
     },
+    value: {
+      type: String,
+      required: true,
+    },
+  },
+],
 
     featured: {
       type: Boolean,
