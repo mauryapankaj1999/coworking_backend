@@ -43,10 +43,6 @@ const workspaceSchema = new mongoose.Schema(
     ],
 
     // Description
-    shortDescription: {
-      type: String,
-      required: true,
-    },
 
     description: {
       type: String,
@@ -64,6 +60,10 @@ const workspaceSchema = new mongoose.Schema(
       required: true,
     },
 
+    mapLink: {
+      type: String,
+    },
+
     state: {
       type: String,
       required: true,
@@ -74,13 +74,6 @@ const workspaceSchema = new mongoose.Schema(
     },
 
     // Location
-    latitude: {
-      type: String,
-    },
-
-    longitude: {
-      type: String,
-    },
 
     // Plans
     plans: [
@@ -100,26 +93,25 @@ const workspaceSchema = new mongoose.Schema(
       },
     ],
 
-    // Community
-    community: [
+    connectivity: [
       {
         type: String,
       },
     ],
 
     // Office Timing
-   officeTiming: [
-  {
-    label: {
-      type: String,
-      required: true,
-    },
-    value: {
-      type: String,
-      required: true,
-    },
-  },
-],
+    officeTiming: [
+      {
+        label: {
+          type: String,
+          required: true,
+        },
+        value: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
 
     featured: {
       type: Boolean,
@@ -133,12 +125,9 @@ const workspaceSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const Workspace = mongoose.model(
-  "Workspace",
-  workspaceSchema
-);
+const Workspace = mongoose.model("Workspace", workspaceSchema);
 
 export default Workspace;
