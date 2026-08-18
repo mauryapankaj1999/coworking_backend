@@ -1,41 +1,6 @@
 import slugify from "slugify";
 import WorkspaceCategory from "../models/WorkspaceCategory.js";
 
-// export const createCategory = async (req, res) => {
-//   try {
-//     const { name } = req.body;
-
-//     if (!name)
-//       return res.status(400).json({
-//         success: false,
-//         message: "Category name is required",
-//       });
-
-//     const exists = await WorkspaceCategory.findOne({ name });
-
-//     if (exists)
-//       return res.status(400).json({
-//         success: false,
-//         message: "Category already exists",
-//       });
-
-//     const category = await WorkspaceCategory.create({
-//       name,
-//       slug: slugify(name, { lower: true }),
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Category created successfully",
-//       data: category,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 export const createCategory = async (req, res) => {
   try {

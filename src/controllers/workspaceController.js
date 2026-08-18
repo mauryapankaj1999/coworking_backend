@@ -4,7 +4,8 @@ import SubCategory from "../models/SubCategory.js";
 
 import slugify from "slugify";
 import cloudinary from "../config/cloudinary.js";
-
+import WorkspaceCategory from "../models/WorkspaceCategory.js";
+import Operator from "../models/Operator.js";
 
 
 
@@ -14,6 +15,8 @@ export const createWorkspace = async (req, res) => {
       name,
       category,
       subCategory,
+      workspaceCategory, // 🆕
+      operator, // 🆕
       description,
       address,
       city,
@@ -28,12 +31,7 @@ export const createWorkspace = async (req, res) => {
       status,
     } = req.body;
 
-    if (
-      !name ||
-      !category ||
-      !subCategory ||
-      !description
-    ) {
+    if (!name || !category || !subCategory || !description) {
       return res.status(400).json({
         success: false,
         message: "Required fields are missing",
@@ -48,7 +46,6 @@ export const createWorkspace = async (req, res) => {
     }
 
     const categoryExists = await Category.findById(category);
-
     if (!categoryExists) {
       return res.status(404).json({
         success: false,
@@ -57,12 +54,32 @@ export const createWorkspace = async (req, res) => {
     }
 
     const subCategoryExists = await SubCategory.findById(subCategory);
-
     if (!subCategoryExists) {
       return res.status(404).json({
         success: false,
         message: "Sub Category not found",
       });
+    }
+
+    // 🆕 optional validation — agar bheja gaya hai to check karo exist karta hai
+    if (workspaceCategory) {
+      const wcExists = await WorkspaceCategory.findById(workspaceCategory);
+      if (!wcExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Workspace Category not found",
+        });
+      }
+    }
+
+    if (operator) {
+      const opExists = await Operator.findById(operator);
+      if (!opExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Operator not found",
+        });
+      }
     }
 
     const images = req.files.map((file) => ({
@@ -73,31 +90,22 @@ export const createWorkspace = async (req, res) => {
     const workspace = await Workspace.create({
       name,
       slug: slugify(name, { lower: true }),
-
       category,
       subCategory,
-
+      workspaceCategory: workspaceCategory || undefined, // 🆕
+      operator: operator || undefined, // 🆕
       images,
-
       description,
-
       address,
       city,
       state,
       pincode,
-
       mapLink,
-
       plans: plans ? JSON.parse(plans) : [],
-
       amenities: amenities ? JSON.parse(amenities) : [],
-
       connectivity: connectivity ? JSON.parse(connectivity) : [],
-
       officeTiming: officeTiming ? JSON.parse(officeTiming) : [],
-
       featured,
-
       status,
     });
 
@@ -119,9 +127,9 @@ export const getWorkspaces = async (req, res) => {
     const workspaces = await Workspace.find()
       .populate("category", "name")
       .populate("subCategory", "name")
-      .sort({
-        createdAt: -1,
-      });
+      .populate("workspaceCategory", "name") // 🆕
+      .populate("operator", "name") // 🆕
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -129,10 +137,7 @@ export const getWorkspaces = async (req, res) => {
       data: workspaces,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -140,24 +145,17 @@ export const getWorkspace = async (req, res) => {
   try {
     const workspace = await Workspace.findById(req.params.id)
       .populate("category", "name")
-      .populate("subCategory", "name");
+      .populate("subCategory", "name")
+      .populate("workspaceCategory", "name") 
+      .populate("operator", "name"); 
 
     if (!workspace) {
-      return res.status(404).json({
-        success: false,
-        message: "Workspace not found",
-      });
+      return res.status(404).json({ success: false, message: "Workspace not found" });
     }
 
-    res.json({
-      success: true,
-      data: workspace,
-    });
+    res.json({ success: true, data: workspace });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -177,6 +175,8 @@ export const updateWorkspace = async (req, res) => {
       "name",
       "category",
       "subCategory",
+       "workspaceCategory", 
+  "operator", 
       "description",
       "address",
       "city",
@@ -347,5 +347,98 @@ export const getWorkspaceBySlug = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+export const getWorkspacesByOperator = async (req, res) => {
+  try {
+    const { operatorId } = req.params;
+
+    const operatorExists = await Operator.findById(operatorId);
+    if (!operatorExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Operator not found",
+      });
+    }
+
+    const workspaces = await Workspace.find({ operator: operatorId, status: true })
+      .populate("category", "name slug")
+      .populate("subCategory", "name slug")
+      .populate("workspaceCategory", "name")
+      .populate("operator", "name")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: workspaces.length,
+      data: workspaces,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const getWorkspacesByCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    const categoryExists = await WorkspaceCategory.findById(categoryId);
+    if (!categoryExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Workspace Category not found",
+      });
+    }
+
+    const workspaces = await Workspace.find({
+      workspaceCategory: categoryId,
+      status: true,
+    })
+      .populate("category", "name slug")
+      .populate("subCategory", "name slug")
+      .populate("workspaceCategory", "name")
+      .populate("operator", "name")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: workspaces.length,
+      data: workspaces,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const getWorkspacesByOperatorSlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const operator = await Operator.findOne({ slug, status: true });
+
+    if (!operator) {
+      return res.status(404).json({
+        success: false,
+        message: "Operator not found",
+      });
+    }
+
+    const workspaces = await Workspace.find({
+      operator: operator._id,
+      status: true,
+    })
+      .populate("category", "name slug")
+      .populate("subCategory", "name slug")
+      .populate("workspaceCategory", "name")
+      .populate("operator", "name slug")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      operator,
+      count: workspaces.length,
+      data: workspaces,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

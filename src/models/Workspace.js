@@ -73,9 +73,15 @@ const workspaceSchema = new mongoose.Schema(
       type: String,
     },
 
-    // Location
+    workspaceCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WorkspaceCategory",
+    },
 
-    // Plans
+    operator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Operator",
+    },
     plans: [
       {
         title: String,
