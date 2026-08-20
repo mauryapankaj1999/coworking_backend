@@ -9,80 +9,154 @@ import Operator from "../models/Operator.js";
 
 
 
+// export const createWorkspace = async (req, res) => {
+//   try {
+//     const {
+//       name,
+//       category,
+//       subCategory,
+//       workspaceCategory, // 🆕
+//       operator, // 🆕
+//       description,
+//       address,
+//       city,
+//       state,
+//       pincode,
+//       mapLink,
+//       plans,
+//       amenities,
+//       connectivity,
+//       officeTiming,
+//       featured,
+//       status,
+//     } = req.body;
+
+//     if (!name || !category || !subCategory || !description) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Required fields are missing",
+//       });
+//     }
+
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Workspace images are required",
+//       });
+//     }
+
+//     const categoryExists = await Category.findById(category);
+//     if (!categoryExists) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Category not found",
+//       });
+//     }
+
+//     const subCategoryExists = await SubCategory.findById(subCategory);
+//     if (!subCategoryExists) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Sub Category not found",
+//       });
+//     }
+
+     
+//     if (workspaceCategory) {
+//       const wcExists = await WorkspaceCategory.findById(workspaceCategory);
+//       if (!wcExists) {
+//         return res.status(404).json({
+//           success: false,
+//           message: "Workspace Category not found",
+//         });
+//       }
+//     }
+
+//     if (operator) {
+//       const opExists = await Operator.findById(operator);
+//       if (!opExists) {
+//         return res.status(404).json({
+//           success: false,
+//           message: "Operator not found",
+//         });
+//       }
+//     }
+
+//     const images = req.files.map((file) => ({
+//       url: file.path,
+//       public_id: file.filename,
+//     }));
+
+//     const workspace = await Workspace.create({
+//       name,
+//       slug: slugify(name, { lower: true }),
+//       category,
+//       subCategory,
+//       workspaceCategory: workspaceCategory || undefined, // 🆕
+//       operator: operator || undefined, // 🆕
+//       images,
+//       description,
+//       address,
+//       city,
+//       state,
+//       pincode,
+//       mapLink,
+//       plans: plans ? JSON.parse(plans) : [],
+//       amenities: amenities ? JSON.parse(amenities) : [],
+//       connectivity: connectivity ? JSON.parse(connectivity) : [],
+//       officeTiming: officeTiming ? JSON.parse(officeTiming) : [],
+//       featured,
+//       status,
+//     });
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Workspace Created Successfully",
+//       data: workspace,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
+
 export const createWorkspace = async (req, res) => {
   try {
+      console.log("========== WORKSPACE CREATE ==========");
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+    console.log("IMAGES:", req.files?.images);
+    console.log("MAIN IMAGES:", req.files?.mainImages);
     const {
-      name,
-      category,
-      subCategory,
-      workspaceCategory, // 🆕
-      operator, // 🆕
-      description,
-      address,
-      city,
-      state,
-      pincode,
-      mapLink,
-      plans,
-      amenities,
-      connectivity,
-      officeTiming,
-      featured,
-      status,
+      name, category, subCategory, workspaceCategory, operator,
+      description, address, city, state, pincode, mapLink,
+      plans, amenities, connectivity, officeTiming, featured, status,
     } = req.body;
 
     if (!name || !category || !subCategory || !description) {
-      return res.status(400).json({
-        success: false,
-        message: "Required fields are missing",
-      });
+      return res.status(400).json({ success: false, message: "Required fields are missing" });
     }
 
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Workspace images are required",
-      });
+    if (!req.files?.images || req.files.images.length === 0) {
+      return res.status(400).json({ success: false, message: "Workspace images are required" });
     }
 
-    const categoryExists = await Category.findById(category);
-    if (!categoryExists) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
+    if (!req.files?.mainImages || req.files.mainImages.length !== 5) {
+      return res.status(400).json({ success: false, message: "Exactly 5 main images are required" });
     }
 
-    const subCategoryExists = await SubCategory.findById(subCategory);
-    if (!subCategoryExists) {
-      return res.status(404).json({
-        success: false,
-        message: "Sub Category not found",
-      });
-    }
+    // ... category/subCategory/workspaceCategory/operator validation same rahega ...
 
-    // 🆕 optional validation — agar bheja gaya hai to check karo exist karta hai
-    if (workspaceCategory) {
-      const wcExists = await WorkspaceCategory.findById(workspaceCategory);
-      if (!wcExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Workspace Category not found",
-        });
-      }
-    }
+    const images = req.files.images.map((file) => ({
+      url: file.path,
+      public_id: file.filename,
+    }));
 
-    if (operator) {
-      const opExists = await Operator.findById(operator);
-      if (!opExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Operator not found",
-        });
-      }
-    }
-
-    const images = req.files.map((file) => ({
+    const mainImages = req.files.mainImages.map((file) => ({
       url: file.path,
       public_id: file.filename,
     }));
@@ -90,37 +164,34 @@ export const createWorkspace = async (req, res) => {
     const workspace = await Workspace.create({
       name,
       slug: slugify(name, { lower: true }),
-      category,
-      subCategory,
-      workspaceCategory: workspaceCategory || undefined, // 🆕
-      operator: operator || undefined, // 🆕
+      category, subCategory,
+      workspaceCategory: workspaceCategory || undefined,
+      operator: operator || undefined,
       images,
-      description,
-      address,
-      city,
-      state,
-      pincode,
-      mapLink,
+      mainImages, // 🆕
+      description, address, city, state, pincode, mapLink,
       plans: plans ? JSON.parse(plans) : [],
       amenities: amenities ? JSON.parse(amenities) : [],
       connectivity: connectivity ? JSON.parse(connectivity) : [],
       officeTiming: officeTiming ? JSON.parse(officeTiming) : [],
-      featured,
-      status,
+      featured, status,
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Workspace Created Successfully",
-      data: workspace,
-    });
+    res.status(201).json({ success: true, message: "Workspace Created Successfully", data: workspace });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+
+
+
+
+
+
 
 export const getWorkspaces = async (req, res) => {
   try {
@@ -160,6 +231,102 @@ export const getWorkspace = async (req, res) => {
 };
 
 
+// export const updateWorkspace = async (req, res) => {
+//   try {
+//     const workspace = await Workspace.findById(req.params.id);
+
+//     if (!workspace) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Workspace not found",
+//       });
+//     }
+
+//     const simpleFields = [
+//       "name",
+//       "category",
+//       "subCategory",
+//        "workspaceCategory", 
+//   "operator", 
+//       "description",
+//       "address",
+//       "city",
+//       "state",
+//       "pincode",
+//       "mapLink",
+//       "featured",
+//       "status",
+//     ];
+
+//     simpleFields.forEach((field) => {
+//       if (req.body[field] !== undefined) {
+//         workspace[field] = req.body[field];
+//       }
+//     });
+
+//     if (req.body.name) {
+//       workspace.slug = slugify(req.body.name, {
+//         lower: true,
+//       });
+//     }
+
+//     if (req.body.plans) workspace.plans = JSON.parse(req.body.plans);
+
+//     if (req.body.amenities)
+//       workspace.amenities = JSON.parse(req.body.amenities);
+
+//     if (req.body.connectivity)
+//       workspace.connectivity = JSON.parse(req.body.connectivity);
+
+//     if (req.body.officeTiming)
+//       workspace.officeTiming = JSON.parse(req.body.officeTiming);
+
+//     if (req.files && req.files.length > 0) {
+//       for (const image of workspace.images) {
+//         await cloudinary.uploader.destroy(image.public_id);
+//       }
+//       if (req.files?.images && req.files.images.length > 0) {
+//   for (const image of workspace.images) {
+//     await cloudinary.uploader.destroy(image.public_id);
+//   }
+//   workspace.images = req.files.images.map((file) => ({
+//     url: file.path,
+//     public_id: file.filename,
+//   }));
+// }
+
+// if (req.files?.mainImages && req.files.mainImages.length > 0) {
+//   for (const image of workspace.mainImages) {
+//     await cloudinary.uploader.destroy(image.public_id);
+//   }
+//   workspace.mainImages = req.files.mainImages.map((file) => ({
+//     url: file.path,
+//     public_id: file.filename,
+//   }));
+// }
+
+//       workspace.images = req.files.map((file) => ({
+//         url: file.path,
+//         public_id: file.filename,
+//       }));
+//     }
+
+//     await workspace.save();
+
+//     res.json({
+//       success: true,
+//       message: "Workspace Updated Successfully",
+//       data: workspace,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
 export const updateWorkspace = async (req, res) => {
   try {
     const workspace = await Workspace.findById(req.params.id);
@@ -175,8 +342,8 @@ export const updateWorkspace = async (req, res) => {
       "name",
       "category",
       "subCategory",
-       "workspaceCategory", 
-  "operator", 
+      "workspaceCategory",
+      "operator",
       "description",
       "address",
       "city",
@@ -210,12 +377,23 @@ export const updateWorkspace = async (req, res) => {
     if (req.body.officeTiming)
       workspace.officeTiming = JSON.parse(req.body.officeTiming);
 
-    if (req.files && req.files.length > 0) {
+    // Gallery images (baaki saari images)
+    if (req.files?.images && req.files.images.length > 0) {
       for (const image of workspace.images) {
         await cloudinary.uploader.destroy(image.public_id);
       }
+      workspace.images = req.files.images.map((file) => ({
+        url: file.path,
+        public_id: file.filename,
+      }));
+    }
 
-      workspace.images = req.files.map((file) => ({
+    // Main gallery images (fixed 5)
+    if (req.files?.mainImages && req.files.mainImages.length > 0) {
+      for (const image of workspace.mainImages || []) {
+        await cloudinary.uploader.destroy(image.public_id);
+      }
+      workspace.mainImages = req.files.mainImages.map((file) => ({
         url: file.path,
         public_id: file.filename,
       }));

@@ -41,6 +41,12 @@ const workspaceSchema = new mongoose.Schema(
         },
       },
     ],
+      mainImages: [
+      {
+        url: { type: String, required: true },
+        public_id: { type: String, required: true },
+      },
+    ],
 
     // Description
 

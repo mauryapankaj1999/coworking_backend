@@ -11,6 +11,7 @@ import blogRoutes from "./routes/blogRouters.js";
 import testimonialRoutes from "./routes/testimonialRoutes.js";
 import workspacecategoriesRoutes from "./routes/workspacecategoryRoutes.js";
 import operatorRoutes from "./routes/operatorRoutes.js";
+import enquiryRoutes from "./routes/enquiryRoutes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/blog", blogRoutes);
 app.use("/api/testimonial", testimonialRoutes);
 app.use("/api/workspacecategories", workspacecategoriesRoutes);
 app.use("/api/operators", operatorRoutes);
+app.use("/api/enquiries", enquiryRoutes);
 app.use(errorHandler);
 
 export default app;
