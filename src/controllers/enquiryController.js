@@ -115,7 +115,7 @@ export const updateEnquiryStatus = async (req, res) => {
 };
 
 
-// delete
+// delete enquiry
 
 export const deleteEnquiry = async (req, res) => {
   try {
