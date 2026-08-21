@@ -114,6 +114,9 @@ export const updateEnquiryStatus = async (req, res) => {
   }
 };
 
+
+// delete
+
 export const deleteEnquiry = async (req, res) => {
   try {
     const enquiry = await Enquiry.findById(req.params.id);
