@@ -126,65 +126,167 @@ import Operator from "../models/Operator.js";
 
 export const createWorkspace = async (req, res) => {
   try {
-      console.log("========== WORKSPACE CREATE ==========");
+    console.log("========== WORKSPACE CREATE ==========");
     console.log("BODY:", req.body);
     console.log("FILES:", req.files);
     console.log("IMAGES:", req.files?.images);
     console.log("MAIN IMAGES:", req.files?.mainImages);
+
     const {
-      name, category, subCategory, workspaceCategory, operator,
-      description, address, city, state, pincode, mapLink,
-      plans, amenities, connectivity, officeTiming, featured, status,
+      name,
+      category,
+      subCategory,
+      workspaceCategory,
+      operator,
+      description,
+      address,
+      city,
+      state,
+      pincode,
+      mapLink,
+      plans,
+      amenities,
+      connectivity,
+      officeTiming,
+      featured,
+      status,
     } = req.body;
 
+
     if (!name || !category || !subCategory || !description) {
-      return res.status(400).json({ success: false, message: "Required fields are missing" });
+      return res.status(400).json({
+        success: false,
+        message: "Required fields are missing",
+      });
     }
 
     if (!req.files?.images || req.files.images.length === 0) {
-      return res.status(400).json({ success: false, message: "Workspace images are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Workspace images are required",
+      });
     }
+
 
     if (!req.files?.mainImages || req.files.mainImages.length !== 5) {
-      return res.status(400).json({ success: false, message: "Exactly 5 main images are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Exactly 5 main images are required",
+      });
     }
 
-    // ... category/subCategory/workspaceCategory/operator validation same rahega ...
+
+    let workspaceCategories = [];
+
+    if (workspaceCategory) {
+      try {
+        // Agar already array hai
+        if (Array.isArray(workspaceCategory)) {
+          workspaceCategories = workspaceCategory;
+        }
+        // Agar JSON string aa rahi hai
+        else if (typeof workspaceCategory === "string") {
+          const parsed = JSON.parse(workspaceCategory);
+
+          if (Array.isArray(parsed)) {
+            workspaceCategories = parsed;
+          } else {
+            workspaceCategories = [workspaceCategory];
+          }
+        }
+      } catch (error) {
+        workspaceCategories = [workspaceCategory];
+      }
+    }
+
+    console.log(
+      "WORKSPACE CATEGORIES:",
+      workspaceCategories
+    );
+
 
     const images = req.files.images.map((file) => ({
       url: file.path,
       public_id: file.filename,
     }));
 
+  
+
     const mainImages = req.files.mainImages.map((file) => ({
       url: file.path,
       public_id: file.filename,
     }));
 
+
     const workspace = await Workspace.create({
       name,
-      slug: slugify(name, { lower: true }),
-      category, subCategory,
-      workspaceCategory: workspaceCategory || undefined,
+
+      slug: slugify(name, {
+        lower: true,
+      }),
+
+      category,
+
+      subCategory,
+
+      // MULTIPLE WORKSPACE CATEGORIES
+      workspaceCategory: workspaceCategories,
+
       operator: operator || undefined,
+
       images,
-      mainImages, // 🆕
-      description, address, city, state, pincode, mapLink,
-      plans: plans ? JSON.parse(plans) : [],
-      amenities: amenities ? JSON.parse(amenities) : [],
-      connectivity: connectivity ? JSON.parse(connectivity) : [],
-      officeTiming: officeTiming ? JSON.parse(officeTiming) : [],
-      featured, status,
+
+      mainImages,
+
+      description,
+
+      address,
+
+      city,
+
+      state,
+
+      pincode,
+
+      mapLink,
+
+      plans: plans
+        ? JSON.parse(plans)
+        : [],
+
+      amenities: amenities
+        ? JSON.parse(amenities)
+        : [],
+
+      connectivity: connectivity
+        ? JSON.parse(connectivity)
+        : [],
+
+      officeTiming: officeTiming
+        ? JSON.parse(officeTiming)
+        : [],
+
+      featured,
+
+      status,
     });
 
-    res.status(201).json({ success: true, message: "Workspace Created Successfully", data: workspace });
+
+    return res.status(201).json({
+      success: true,
+      message: "Workspace Created Successfully",
+      data: workspace,
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.log("CREATE WORKSPACE ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
-
-
-
 
 
 

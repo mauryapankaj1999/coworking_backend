@@ -79,10 +79,16 @@ const workspaceSchema = new mongoose.Schema(
       type: String,
     },
 
-    workspaceCategory: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "WorkspaceCategory",
-    },
+  workspaceCategory: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "WorkspaceCategory",
+  },
+],
+    is24x7: {
+  type: Boolean,
+  default: false,
+}, 
 
     operator: {
       type: mongoose.Schema.Types.ObjectId,
