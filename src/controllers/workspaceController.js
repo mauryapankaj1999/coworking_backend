@@ -333,8 +333,10 @@ export const getWorkspace = async (req, res) => {
 };
 
 
+
 // export const updateWorkspace = async (req, res) => {
 //   try {
+//     // Find workspace
 //     const workspace = await Workspace.findById(req.params.id);
 
 //     if (!workspace) {
@@ -344,101 +346,13 @@ export const getWorkspace = async (req, res) => {
 //       });
 //     }
 
-//     const simpleFields = [
-//       "name",
+  
+//     const objectIdFields = [
 //       "category",
 //       "subCategory",
-//        "workspaceCategory", 
-//   "operator", 
-//       "description",
-//       "address",
-//       "city",
-//       "state",
-//       "pincode",
-//       "mapLink",
-//       "featured",
-//       "status",
+//       "workspaceCategory",
+//       "operator",
 //     ];
-
-//     simpleFields.forEach((field) => {
-//       if (req.body[field] !== undefined) {
-//         workspace[field] = req.body[field];
-//       }
-//     });
-
-//     if (req.body.name) {
-//       workspace.slug = slugify(req.body.name, {
-//         lower: true,
-//       });
-//     }
-
-//     if (req.body.plans) workspace.plans = JSON.parse(req.body.plans);
-
-//     if (req.body.amenities)
-//       workspace.amenities = JSON.parse(req.body.amenities);
-
-//     if (req.body.connectivity)
-//       workspace.connectivity = JSON.parse(req.body.connectivity);
-
-//     if (req.body.officeTiming)
-//       workspace.officeTiming = JSON.parse(req.body.officeTiming);
-
-//     if (req.files && req.files.length > 0) {
-//       for (const image of workspace.images) {
-//         await cloudinary.uploader.destroy(image.public_id);
-//       }
-//       if (req.files?.images && req.files.images.length > 0) {
-//   for (const image of workspace.images) {
-//     await cloudinary.uploader.destroy(image.public_id);
-//   }
-//   workspace.images = req.files.images.map((file) => ({
-//     url: file.path,
-//     public_id: file.filename,
-//   }));
-// }
-
-// if (req.files?.mainImages && req.files.mainImages.length > 0) {
-//   for (const image of workspace.mainImages) {
-//     await cloudinary.uploader.destroy(image.public_id);
-//   }
-//   workspace.mainImages = req.files.mainImages.map((file) => ({
-//     url: file.path,
-//     public_id: file.filename,
-//   }));
-// }
-
-//       workspace.images = req.files.map((file) => ({
-//         url: file.path,
-//         public_id: file.filename,
-//       }));
-//     }
-
-//     await workspace.save();
-
-//     res.json({
-//       success: true,
-//       message: "Workspace Updated Successfully",
-//       data: workspace,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-
-// export const updateWorkspace = async (req, res) => {
-//   try {
-//     const workspace = await Workspace.findById(req.params.id);
-
-//     if (!workspace) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Workspace not found",
-//       });
-//     }
 
 //     const simpleFields = [
 //       "name",
@@ -458,82 +372,190 @@ export const getWorkspace = async (req, res) => {
 
 //     simpleFields.forEach((field) => {
 //       if (req.body[field] !== undefined) {
-//         workspace[field] = req.body[field];
+//         // ObjectId fields
+//         if (objectIdFields.includes(field)) {
+//           const value = req.body[field];
+
+//           // Empty ObjectId value handle
+//           if (
+//             value === "" ||
+//             value === null ||
+//             value === "null" ||
+//             value === "undefined"
+//           ) {
+//             workspace[field] = undefined;
+//           } else {
+//             workspace[field] = value;
+//           }
+//         } else {
+//           // Normal fields
+//           workspace[field] = req.body[field];
+//         }
 //       }
 //     });
 
+ 
 //     if (req.body.name) {
 //       workspace.slug = slugify(req.body.name, {
 //         lower: true,
+//         strict: true,
 //       });
 //     }
 
-//     if (req.body.plans) workspace.plans = JSON.parse(req.body.plans);
-
-//     if (req.body.amenities)
-//       workspace.amenities = JSON.parse(req.body.amenities);
-
-//     if (req.body.connectivity)
-//       workspace.connectivity = JSON.parse(req.body.connectivity);
-
-//     if (req.body.officeTiming)
-//       workspace.officeTiming = JSON.parse(req.body.officeTiming);
-
-//     // Gallery images (baaki saari images)
-//     if (req.files?.images && req.files.images.length > 0) {
-//       for (const image of workspace.images) {
-//         await cloudinary.uploader.destroy(image.public_id);
+ 
+//     if (req.body.plans !== undefined) {
+//       try {
+//         workspace.plans =
+//           typeof req.body.plans === "string"
+//             ? JSON.parse(req.body.plans)
+//             : req.body.plans;
+//       } catch (error) {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Invalid plans JSON",
+//         });
 //       }
+//     }
+
+//     // -----------------------------------------
+//     // Amenities
+//     // -----------------------------------------
+//     if (req.body.amenities !== undefined) {
+//       try {
+//         workspace.amenities =
+//           typeof req.body.amenities === "string"
+//             ? JSON.parse(req.body.amenities)
+//             : req.body.amenities;
+//       } catch (error) {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Invalid amenities JSON",
+//         });
+//       }
+//     }
+
+//     // -----------------------------------------
+//     // Connectivity
+//     // -----------------------------------------
+//     if (req.body.connectivity !== undefined) {
+//       try {
+//         workspace.connectivity =
+//           typeof req.body.connectivity === "string"
+//             ? JSON.parse(req.body.connectivity)
+//             : req.body.connectivity;
+//       } catch (error) {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Invalid connectivity JSON",
+//         });
+//       }
+//     }
+
+//     // -----------------------------------------
+//     // Office Timing
+//     // -----------------------------------------
+//     if (req.body.officeTiming !== undefined) {
+//       try {
+//         workspace.officeTiming =
+//           typeof req.body.officeTiming === "string"
+//             ? JSON.parse(req.body.officeTiming)
+//             : req.body.officeTiming;
+//       } catch (error) {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Invalid officeTiming JSON",
+//         });
+//       }
+//     }
+
+//     // -----------------------------------------
+//     // Gallery Images
+//     // -----------------------------------------
+//     if (req.files?.images && req.files.images.length > 0) {
+//       // Delete old images from Cloudinary
+//       for (const image of workspace.images || []) {
+//         if (image.public_id) {
+//           try {
+//             await cloudinary.uploader.destroy(image.public_id);
+//           } catch (error) {
+//             console.log(
+//               "Old gallery image delete error:",
+//               error.message
+//             );
+//           }
+//         }
+//       }
+
+//       // Add new images
 //       workspace.images = req.files.images.map((file) => ({
 //         url: file.path,
 //         public_id: file.filename,
 //       }));
 //     }
 
-//     // Main gallery images (fixed 5)
-//     if (req.files?.mainImages && req.files.mainImages.length > 0) {
+//     // -----------------------------------------
+//     // Main Images
+//     // -----------------------------------------
+//     if (
+//       req.files?.mainImages &&
+//       req.files.mainImages.length > 0
+//     ) {
+//       // Delete old main images from Cloudinary
 //       for (const image of workspace.mainImages || []) {
-//         await cloudinary.uploader.destroy(image.public_id);
+//         if (image.public_id) {
+//           try {
+//             await cloudinary.uploader.destroy(image.public_id);
+//           } catch (error) {
+//             console.log(
+//               "Old main image delete error:",
+//               error.message
+//             );
+//           }
+//         }
 //       }
+
+//       // Add new main images
 //       workspace.mainImages = req.files.mainImages.map((file) => ({
 //         url: file.path,
 //         public_id: file.filename,
 //       }));
 //     }
 
+//     // -----------------------------------------
+//     // Save Workspace
+//     // -----------------------------------------
 //     await workspace.save();
 
-//     res.json({
+//     // -----------------------------------------
+//     // Response
+//     // -----------------------------------------
+//     return res.status(200).json({
 //       success: true,
 //       message: "Workspace Updated Successfully",
 //       data: workspace,
 //     });
 //   } catch (error) {
-//     res.status(500).json({
+//     console.error("Update Workspace Error:", error);
+
+//     return res.status(500).json({
 //       success: false,
 //       message: error.message,
 //     });
 //   }
 // };
 
-
 export const updateWorkspace = async (req, res) => {
   try {
-    // Find workspace
     const workspace = await Workspace.findById(req.params.id);
-
     if (!workspace) {
       return res.status(404).json({
         success: false,
         message: "Workspace not found",
       });
     }
-
-  
     const objectIdFields = [
       "category",
       "subCategory",
-      "workspaceCategory",
       "operator",
     ];
 
@@ -541,7 +563,6 @@ export const updateWorkspace = async (req, res) => {
       "name",
       "category",
       "subCategory",
-      "workspaceCategory",
       "operator",
       "description",
       "address",
@@ -552,14 +573,12 @@ export const updateWorkspace = async (req, res) => {
       "featured",
       "status",
     ];
-
     simpleFields.forEach((field) => {
       if (req.body[field] !== undefined) {
+        const value = req.body[field];
+
         // ObjectId fields
         if (objectIdFields.includes(field)) {
-          const value = req.body[field];
-
-          // Empty ObjectId value handle
           if (
             value === "" ||
             value === null ||
@@ -572,12 +591,60 @@ export const updateWorkspace = async (req, res) => {
           }
         } else {
           // Normal fields
-          workspace[field] = req.body[field];
+          workspace[field] = value;
         }
       }
     });
 
- 
+    if (req.body.workspaceCategory !== undefined) {
+      try {
+        let workspaceCategories = req.body.workspaceCategory;
+
+        console.log(
+          "RAW workspaceCategory:",
+          workspaceCategories
+        );
+
+        // FormData se string aa sakti hai
+        if (typeof workspaceCategories === "string") {
+          workspaceCategories = JSON.parse(workspaceCategories);
+        }
+
+        // Agar single ID aa gayi ho
+        if (!Array.isArray(workspaceCategories)) {
+          workspaceCategories = [workspaceCategories];
+        }
+
+        // Nested arrays remove + empty values remove
+        workspaceCategories = workspaceCategories
+          .flat(Infinity)
+          .filter(
+            (id) =>
+              id &&
+              id !== "null" &&
+              id !== "undefined" &&
+              id !== ""
+          );
+
+        console.log(
+          "FINAL workspaceCategories:",
+          workspaceCategories
+        );
+
+        workspace.workspaceCategory = workspaceCategories;
+      } catch (error) {
+        console.error(
+          "workspaceCategory parse error:",
+          error
+        );
+
+        return res.status(400).json({
+          success: false,
+          message: "Invalid workspaceCategory",
+        });
+      }
+    }
+
     if (req.body.name) {
       workspace.slug = slugify(req.body.name, {
         lower: true,
@@ -585,7 +652,6 @@ export const updateWorkspace = async (req, res) => {
       });
     }
 
- 
     if (req.body.plans !== undefined) {
       try {
         workspace.plans =
@@ -600,9 +666,7 @@ export const updateWorkspace = async (req, res) => {
       }
     }
 
-    // -----------------------------------------
-    // Amenities
-    // -----------------------------------------
+
     if (req.body.amenities !== undefined) {
       try {
         workspace.amenities =
@@ -617,9 +681,7 @@ export const updateWorkspace = async (req, res) => {
       }
     }
 
-    // -----------------------------------------
-    // Connectivity
-    // -----------------------------------------
+ 
     if (req.body.connectivity !== undefined) {
       try {
         workspace.connectivity =
@@ -634,9 +696,7 @@ export const updateWorkspace = async (req, res) => {
       }
     }
 
-    // -----------------------------------------
-    // Office Timing
-    // -----------------------------------------
+   
     if (req.body.officeTiming !== undefined) {
       try {
         workspace.officeTiming =
@@ -651,15 +711,17 @@ export const updateWorkspace = async (req, res) => {
       }
     }
 
-    // -----------------------------------------
-    // Gallery Images
-    // -----------------------------------------
-    if (req.files?.images && req.files.images.length > 0) {
+    if (
+      req.files?.images &&
+      req.files.images.length > 0
+    ) {
       // Delete old images from Cloudinary
       for (const image of workspace.images || []) {
         if (image.public_id) {
           try {
-            await cloudinary.uploader.destroy(image.public_id);
+            await cloudinary.uploader.destroy(
+              image.public_id
+            );
           } catch (error) {
             console.log(
               "Old gallery image delete error:",
@@ -670,15 +732,15 @@ export const updateWorkspace = async (req, res) => {
       }
 
       // Add new images
-      workspace.images = req.files.images.map((file) => ({
-        url: file.path,
-        public_id: file.filename,
-      }));
+      workspace.images = req.files.images.map(
+        (file) => ({
+          url: file.path,
+          public_id: file.filename,
+        })
+      );
     }
 
-    // -----------------------------------------
-    // Main Images
-    // -----------------------------------------
+
     if (
       req.files?.mainImages &&
       req.files.mainImages.length > 0
@@ -687,7 +749,9 @@ export const updateWorkspace = async (req, res) => {
       for (const image of workspace.mainImages || []) {
         if (image.public_id) {
           try {
-            await cloudinary.uploader.destroy(image.public_id);
+            await cloudinary.uploader.destroy(
+              image.public_id
+            );
           } catch (error) {
             console.log(
               "Old main image delete error:",
@@ -698,27 +762,27 @@ export const updateWorkspace = async (req, res) => {
       }
 
       // Add new main images
-      workspace.mainImages = req.files.mainImages.map((file) => ({
-        url: file.path,
-        public_id: file.filename,
-      }));
+      workspace.mainImages =
+        req.files.mainImages.map((file) => ({
+          url: file.path,
+          public_id: file.filename,
+        }));
     }
 
-    // -----------------------------------------
-    // Save Workspace
-    // -----------------------------------------
+    
     await workspace.save();
 
-    // -----------------------------------------
-    // Response
-    // -----------------------------------------
+ 
     return res.status(200).json({
       success: true,
       message: "Workspace Updated Successfully",
       data: workspace,
     });
   } catch (error) {
-    console.error("Update Workspace Error:", error);
+    console.error(
+      "Update Workspace Error:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
