@@ -663,7 +663,8 @@ export const getWorkspacesByOperator = async (req, res) => {
 };
 
 
-// udpates workspace status
+// udpates workspace status adfadf
+
 
 export const getWorkspacesByCategory = async (req, res) => {
   try {
