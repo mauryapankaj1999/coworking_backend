@@ -41,7 +41,7 @@ const workspaceSchema = new mongoose.Schema(
         },
       },
     ],
-      mainImages: [
+    mainImages: [
       {
         url: { type: String, required: true },
         public_id: { type: String, required: true },
@@ -79,16 +79,16 @@ const workspaceSchema = new mongoose.Schema(
       type: String,
     },
 
-  workspaceCategory: [
-  {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "WorkspaceCategory",
-  },
-],
+    workspaceCategory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "WorkspaceCategory",
+      },
+    ],
     is24x7: {
-  type: Boolean,
-  default: false,
-}, 
+      type: Boolean,
+      default: false,
+    },
 
     operator: {
       type: mongoose.Schema.Types.ObjectId,
@@ -136,15 +136,41 @@ const workspaceSchema = new mongoose.Schema(
       default: false,
     },
 
-    status: {
-      type: Boolean,
-      default: true,
-    },
+   status: {
+  type: String,
+  enum: ["pending", "approved", "rejected"],
+  default: "pending",
+},
   },
   {
     timestamps: true,
   },
 );
+
+workspaceSchema.index({
+  category: 1,
+  status: 1,
+  createdAt: -1,
+});
+
+workspaceSchema.index({
+  category: 1,
+  subCategory: 1,
+  status: 1,
+  createdAt: -1,
+});
+
+workspaceSchema.index({
+  operator: 1,
+  status: 1,
+  createdAt: -1,
+});
+
+workspaceSchema.index({
+  workspaceCategory: 1,
+  status: 1,
+  createdAt: -1,
+});
 
 const Workspace = mongoose.model("Workspace", workspaceSchema);
 

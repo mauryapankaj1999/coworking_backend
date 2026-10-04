@@ -9,120 +9,6 @@ import Operator from "../models/Operator.js";
 
 
 
-// export const createWorkspace = async (req, res) => {
-//   try {
-//     const {
-//       name,
-//       category,
-//       subCategory,
-//       workspaceCategory, // 🆕
-//       operator, // 🆕
-//       description,
-//       address,
-//       city,
-//       state,
-//       pincode,
-//       mapLink,
-//       plans,
-//       amenities,
-//       connectivity,
-//       officeTiming,
-//       featured,
-//       status,
-//     } = req.body;
-
-//     if (!name || !category || !subCategory || !description) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Required fields are missing",
-//       });
-//     }
-
-//     if (!req.files || req.files.length === 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Workspace images are required",
-//       });
-//     }
-
-//     const categoryExists = await Category.findById(category);
-//     if (!categoryExists) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Category not found",
-//       });
-//     }
-
-//     const subCategoryExists = await SubCategory.findById(subCategory);
-//     if (!subCategoryExists) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Sub Category not found",
-//       });
-//     }
-
-     
-//     if (workspaceCategory) {
-//       const wcExists = await WorkspaceCategory.findById(workspaceCategory);
-//       if (!wcExists) {
-//         return res.status(404).json({
-//           success: false,
-//           message: "Workspace Category not found",
-//         });
-//       }
-//     }
-
-//     if (operator) {
-//       const opExists = await Operator.findById(operator);
-//       if (!opExists) {
-//         return res.status(404).json({
-//           success: false,
-//           message: "Operator not found",
-//         });
-//       }
-//     }
-
-//     const images = req.files.map((file) => ({
-//       url: file.path,
-//       public_id: file.filename,
-//     }));
-
-//     const workspace = await Workspace.create({
-//       name,
-//       slug: slugify(name, { lower: true }),
-//       category,
-//       subCategory,
-//       workspaceCategory: workspaceCategory || undefined, // 🆕
-//       operator: operator || undefined, // 🆕
-//       images,
-//       description,
-//       address,
-//       city,
-//       state,
-//       pincode,
-//       mapLink,
-//       plans: plans ? JSON.parse(plans) : [],
-//       amenities: amenities ? JSON.parse(amenities) : [],
-//       connectivity: connectivity ? JSON.parse(connectivity) : [],
-//       officeTiming: officeTiming ? JSON.parse(officeTiming) : [],
-//       featured,
-//       status,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Workspace Created Successfully",
-//       data: workspace,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-
 
 export const createWorkspace = async (req, res) => {
   try {
@@ -290,18 +176,13 @@ export const createWorkspace = async (req, res) => {
 
 
 
-
-
-
-
-
 export const getWorkspaces = async (req, res) => {
   try {
     const workspaces = await Workspace.find()
       .populate("category", "name")
       .populate("subCategory", "name")
-      .populate("workspaceCategory", "name") // 🆕
-      .populate("operator", "name") // 🆕
+      .populate("workspaceCategory", "name")
+      .populate("operator", "name")
       .sort({ createdAt: -1 });
 
     res.json({
@@ -333,216 +214,6 @@ export const getWorkspace = async (req, res) => {
 };
 
 
-
-// export const updateWorkspace = async (req, res) => {
-//   try {
-//     // Find workspace
-//     const workspace = await Workspace.findById(req.params.id);
-
-//     if (!workspace) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Workspace not found",
-//       });
-//     }
-
-  
-//     const objectIdFields = [
-//       "category",
-//       "subCategory",
-//       "workspaceCategory",
-//       "operator",
-//     ];
-
-//     const simpleFields = [
-//       "name",
-//       "category",
-//       "subCategory",
-//       "workspaceCategory",
-//       "operator",
-//       "description",
-//       "address",
-//       "city",
-//       "state",
-//       "pincode",
-//       "mapLink",
-//       "featured",
-//       "status",
-//     ];
-
-//     simpleFields.forEach((field) => {
-//       if (req.body[field] !== undefined) {
-//         // ObjectId fields
-//         if (objectIdFields.includes(field)) {
-//           const value = req.body[field];
-
-//           // Empty ObjectId value handle
-//           if (
-//             value === "" ||
-//             value === null ||
-//             value === "null" ||
-//             value === "undefined"
-//           ) {
-//             workspace[field] = undefined;
-//           } else {
-//             workspace[field] = value;
-//           }
-//         } else {
-//           // Normal fields
-//           workspace[field] = req.body[field];
-//         }
-//       }
-//     });
-
- 
-//     if (req.body.name) {
-//       workspace.slug = slugify(req.body.name, {
-//         lower: true,
-//         strict: true,
-//       });
-//     }
-
- 
-//     if (req.body.plans !== undefined) {
-//       try {
-//         workspace.plans =
-//           typeof req.body.plans === "string"
-//             ? JSON.parse(req.body.plans)
-//             : req.body.plans;
-//       } catch (error) {
-//         return res.status(400).json({
-//           success: false,
-//           message: "Invalid plans JSON",
-//         });
-//       }
-//     }
-
-//     // -----------------------------------------
-//     // Amenities
-//     // -----------------------------------------
-//     if (req.body.amenities !== undefined) {
-//       try {
-//         workspace.amenities =
-//           typeof req.body.amenities === "string"
-//             ? JSON.parse(req.body.amenities)
-//             : req.body.amenities;
-//       } catch (error) {
-//         return res.status(400).json({
-//           success: false,
-//           message: "Invalid amenities JSON",
-//         });
-//       }
-//     }
-
-//     // -----------------------------------------
-//     // Connectivity
-//     // -----------------------------------------
-//     if (req.body.connectivity !== undefined) {
-//       try {
-//         workspace.connectivity =
-//           typeof req.body.connectivity === "string"
-//             ? JSON.parse(req.body.connectivity)
-//             : req.body.connectivity;
-//       } catch (error) {
-//         return res.status(400).json({
-//           success: false,
-//           message: "Invalid connectivity JSON",
-//         });
-//       }
-//     }
-
-//     // -----------------------------------------
-//     // Office Timing
-//     // -----------------------------------------
-//     if (req.body.officeTiming !== undefined) {
-//       try {
-//         workspace.officeTiming =
-//           typeof req.body.officeTiming === "string"
-//             ? JSON.parse(req.body.officeTiming)
-//             : req.body.officeTiming;
-//       } catch (error) {
-//         return res.status(400).json({
-//           success: false,
-//           message: "Invalid officeTiming JSON",
-//         });
-//       }
-//     }
-
-//     // -----------------------------------------
-//     // Gallery Images
-//     // -----------------------------------------
-//     if (req.files?.images && req.files.images.length > 0) {
-//       // Delete old images from Cloudinary
-//       for (const image of workspace.images || []) {
-//         if (image.public_id) {
-//           try {
-//             await cloudinary.uploader.destroy(image.public_id);
-//           } catch (error) {
-//             console.log(
-//               "Old gallery image delete error:",
-//               error.message
-//             );
-//           }
-//         }
-//       }
-
-//       // Add new images
-//       workspace.images = req.files.images.map((file) => ({
-//         url: file.path,
-//         public_id: file.filename,
-//       }));
-//     }
-
-//     // -----------------------------------------
-//     // Main Images
-//     // -----------------------------------------
-//     if (
-//       req.files?.mainImages &&
-//       req.files.mainImages.length > 0
-//     ) {
-//       // Delete old main images from Cloudinary
-//       for (const image of workspace.mainImages || []) {
-//         if (image.public_id) {
-//           try {
-//             await cloudinary.uploader.destroy(image.public_id);
-//           } catch (error) {
-//             console.log(
-//               "Old main image delete error:",
-//               error.message
-//             );
-//           }
-//         }
-//       }
-
-//       // Add new main images
-//       workspace.mainImages = req.files.mainImages.map((file) => ({
-//         url: file.path,
-//         public_id: file.filename,
-//       }));
-//     }
-
-//     // -----------------------------------------
-//     // Save Workspace
-//     // -----------------------------------------
-//     await workspace.save();
-
-//     // -----------------------------------------
-//     // Response
-//     // -----------------------------------------
-//     return res.status(200).json({
-//       success: true,
-//       message: "Workspace Updated Successfully",
-//       data: workspace,
-//     });
-//   } catch (error) {
-//     console.error("Update Workspace Error:", error);
-
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 export const updateWorkspace = async (req, res) => {
   try {
@@ -821,14 +492,24 @@ export const deleteWorkspace = async (req, res) => {
 };
 
 
+
 export const getWorkspacesBySlug = async (req, res) => {
   try {
     const { citySlug, subCategorySlug } = req.params;
 
+    // Pagination
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 24);
+
+    const skip = (page - 1) * limit;
+
+    // Find city/category
     const category = await Category.findOne({
       slug: citySlug,
       status: true,
-    });
+    })
+      .select("_id name slug")
+      .lean();
 
     if (!category) {
       return res.status(404).json({
@@ -837,16 +518,20 @@ export const getWorkspacesBySlug = async (req, res) => {
       });
     }
 
+    // Base filter
     const filter = {
       category: category._id,
-      status: true,
+      status: "approved",
     };
 
+    // If sub-category/location selected
     if (subCategorySlug) {
       const subCategory = await SubCategory.findOne({
         slug: subCategorySlug,
         status: true,
-      });
+      })
+        .select("_id name slug")
+        .lean();
 
       if (!subCategory) {
         return res.status(404).json({
@@ -858,17 +543,41 @@ export const getWorkspacesBySlug = async (req, res) => {
       filter.subCategory = subCategory._id;
     }
 
-    const workspaces = await Workspace.find(filter)
-      .populate("category", "name slug")
-      .populate("subCategory", "name slug")
-      .sort({ createdAt: -1 });
+    // Get workspace data + total count together
+    const [workspaces, total] = await Promise.all([
+      Workspace.find(filter)
+        .select(
+          "_id name slug featured address city state plans images category subCategory createdAt"
+        )
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      Workspace.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
 
     res.json({
       success: true,
+
       count: workspaces.length,
+
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+
       data: workspaces,
     });
   } catch (error) {
+    console.error("GET WORKSPACES BY SLUG ERROR:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -877,14 +586,20 @@ export const getWorkspacesBySlug = async (req, res) => {
 };
 
 
+
+
+
 export const getWorkspaceBySlug = async (req, res) => {
   try {
     const workspace = await Workspace.findOne({
       slug: req.params.slug,
-      status: true,
+      status: "approved",
     })
       .populate("category", "name slug")
-      .populate("subCategory", "name slug");
+      .populate("subCategory", "name slug")
+      .populate("workspaceCategory", "name")
+      .populate("operator", "name slug")
+      .lean();
 
     if (!workspace) {
       return res.status(404).json({
@@ -898,6 +613,8 @@ export const getWorkspaceBySlug = async (req, res) => {
       data: workspace,
     });
   } catch (error) {
+    console.error("GET WORKSPACE BY SLUG ERROR:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
