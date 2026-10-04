@@ -665,7 +665,6 @@ export const getWorkspacesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
 
-    // Validate workspace category ID
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
       return res.status(400).json({
         success: false,
@@ -675,7 +674,6 @@ export const getWorkspacesByCategory = async (req, res) => {
 
     const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
-    // Check workspace category
     const categoryExists = await WorkspaceCategory.findById(
       categoryObjectId
     ).lean();
@@ -687,11 +685,8 @@ export const getWorkspacesByCategory = async (req, res) => {
       });
     }
 
-    // Find workspaces
     const workspaces = await Workspace.find({
-      workspaceCategory: {
-        $in: [categoryObjectId],
-      },
+      workspaceCategory: categoryObjectId,
       status: true,
     })
       .populate("category", "name slug")
@@ -700,6 +695,13 @@ export const getWorkspacesByCategory = async (req, res) => {
       .populate("operator", "name")
       .sort({ createdAt: -1 })
       .lean();
+
+    console.log("=================================");
+    console.log("WORKSPACE CATEGORY ID:", categoryId);
+    console.log("CATEGORY OBJECT ID:", categoryObjectId);
+    console.log("CATEGORY NAME:", categoryExists.name);
+    console.log("MATCHING WORKSPACES:", workspaces.length);
+    console.log("=================================");
 
     return res.status(200).json({
       success: true,
