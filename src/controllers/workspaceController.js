@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import Workspace from "../models/Workspace.js";
 import Category from "../models/Category.js";
 import SubCategory from "../models/SubCategory.js";
@@ -663,7 +665,21 @@ export const getWorkspacesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
 
-    const categoryExists = await WorkspaceCategory.findById(categoryId);
+    // Validate workspace category ID
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid workspace category ID",
+      });
+    }
+
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
+
+    // Check workspace category
+    const categoryExists = await WorkspaceCategory.findById(
+      categoryObjectId
+    ).lean();
+
     if (!categoryExists) {
       return res.status(404).json({
         success: false,
@@ -671,25 +687,35 @@ export const getWorkspacesByCategory = async (req, res) => {
       });
     }
 
+    // Find workspaces
     const workspaces = await Workspace.find({
-      workspaceCategory: categoryId,
+      workspaceCategory: {
+        $in: [categoryObjectId],
+      },
       status: true,
     })
       .populate("category", "name slug")
       .populate("subCategory", "name slug")
       .populate("workspaceCategory", "name")
       .populate("operator", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    res.json({
+    return res.status(200).json({
       success: true,
       count: workspaces.length,
       data: workspaces,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("GET WORKSPACES BY CATEGORY ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
+
 export const getWorkspacesByOperatorSlug = async (req, res) => {
   try {
     const { slug } = req.params;
