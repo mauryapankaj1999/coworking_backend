@@ -661,6 +661,10 @@ export const getWorkspacesByOperator = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+// udpates workspace status
+
 export const getWorkspacesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
