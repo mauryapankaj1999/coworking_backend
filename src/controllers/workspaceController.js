@@ -499,17 +499,24 @@ export const getWorkspacesBySlug = async (req, res) => {
 
     // Pagination
     const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 24);
+    const limit = Math.min(
+      Math.max(Number(req.query.limit) || 12, 1),
+      24
+    );
 
     const skip = (page - 1) * limit;
 
     // Find city/category
     const category = await Category.findOne({
       slug: citySlug,
-      status: true,
     })
-      .select("_id name slug")
+      .select("_id name slug status")
       .lean();
+
+    console.log("=================================");
+    console.log("CITY SLUG:", citySlug);
+    console.log("CATEGORY FOUND:", category);
+    console.log("=================================");
 
     if (!category) {
       return res.status(404).json({
@@ -521,17 +528,18 @@ export const getWorkspacesBySlug = async (req, res) => {
     // Base filter
     const filter = {
       category: category._id,
-      status: "approved",
+      // status: true,
     };
 
     // If sub-category/location selected
     if (subCategorySlug) {
       const subCategory = await SubCategory.findOne({
         slug: subCategorySlug,
-        status: true,
       })
-        .select("_id name slug")
+        .select("_id name slug status")
         .lean();
+
+      console.log("SUB CATEGORY FOUND:", subCategory);
 
       if (!subCategory) {
         return res.status(404).json({
@@ -543,27 +551,30 @@ export const getWorkspacesBySlug = async (req, res) => {
       filter.subCategory = subCategory._id;
     }
 
-    // Get workspace data + total count together
-    const [workspaces, total] = await Promise.all([
-      Workspace.find(filter)
-        .select(
-          "_id name slug featured address city state plans images category subCategory createdAt"
-        )
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+    console.log("FINAL WORKSPACE FILTER:", filter);
 
-      Workspace.countDocuments(filter),
-    ]);
+    // Check how many records match filter
+    const total = await Workspace.countDocuments(filter);
+
+    console.log("MATCHING WORKSPACES:", total);
+
+    // Get workspaces
+    const workspaces = await Workspace.find(filter)
+      .select(
+        "_id name slug featured address city state plans images category subCategory createdAt"
+      )
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    console.log("WORKSPACES RETURNED:", workspaces.length);
 
     const totalPages = Math.ceil(total / limit);
 
     res.json({
       success: true,
-
       count: workspaces.length,
-
       pagination: {
         page,
         limit,
@@ -572,7 +583,6 @@ export const getWorkspacesBySlug = async (req, res) => {
         hasNextPage: page < totalPages,
         hasPreviousPage: page > 1,
       },
-
       data: workspaces,
     });
   } catch (error) {
@@ -584,7 +594,6 @@ export const getWorkspacesBySlug = async (req, res) => {
     });
   }
 };
-
 
 
 
